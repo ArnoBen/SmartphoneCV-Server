@@ -1,10 +1,10 @@
 import socket
 import socketserver
 import json
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -17,15 +17,15 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         # self.request is the TCP socket connected to the client
-        self.data = self.request.recv(2**14) # 2**14 = 16384 bytes
+        self.data = self.request.recv(2 ** 14)  # 2**14 = 16384 bytes
         decoded = cv2.imdecode(np.frombuffer(self.data, np.uint8), -1)
-        if decoded is not None:    
+        if decoded is not None:
             print(f"Received image of resolution {decoded.shape}")
             cv2.imshow("Webcam", decoded)
             cv2.waitKey(1)
             return
-        #cv.imshow("received frame", decoded)
-        
+        # cv.imshow("received frame", decoded)
+
         # print("{} wrote:".format(self.client_address[0]))
         # print(len(self.data))
         # just send back the same data, but upper-cased
@@ -37,25 +37,26 @@ def display_image(data):
 
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999
+    HOST, PORT = socket.gethostbyname(socket.gethostname()), 9999
+    print("Socket at IP " + HOST)
 
     cv2.namedWindow("Webcam", cv2.WINDOW_NORMAL)
 
     # Create the server, binding to localhost on port 9999
-    server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
-    #server.server_close()
+    server = socketserver.TCPServer(("192.168.0.75", PORT), MyTCPHandler)
+    # server.server_close()
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
 #
-#class Sender:
+# class Sender:
 #    def __init__(self):     
 #        self.sock = socket.socket(socket.AF_INET, # Internet
 #                         socket.SOCK_DGRAM) # UDP
 #    def send(self, data, adress = "127.0.0.1", port = 9999):
 #        self.sock.sendto(json.dumps(data).encode(), (adress, port))
 #        
-#class Receiver:
+# class Receiver:
 #    def __init__(self):
 #        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #    
@@ -79,4 +80,4 @@ if __name__ == "__main__":
 #            bytes_recd = bytes_recd + len(chunk)
 #        return b''.join(chunks)
 #    
-#    
+#
