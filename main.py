@@ -23,12 +23,19 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print(f"Received image of resolution {decoded.shape}")
             cv2.imshow("Webcam", decoded)
             cv2.waitKey(1)
+            print("Sending answer")
             self.request.sendall(f"Received image of shape {decoded.shape}".encode("utf-8"))
             return
 
-def display_image(data):
-    img = np.reshape(data, ())
 
+def send_message():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(("localhost", 9999))
+    s.send("some message".encode("utf-8"))
+    # I think it can receive. See https://wiki.python.org/moin/TcpCommunication
+    data = s.recv(1024)
+    s.close()
+    print(f"received data of length {len(data)}")
 
 if __name__ == "__main__":
     HOST, PORT = socket.gethostbyname(socket.gethostname()), 9999
