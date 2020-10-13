@@ -31,7 +31,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
 
 def process_data(data):
-    print("Received data: " + data.decode("utf8"))
+    print(f"Received data of length {len(data)}")
+    return f"Received data of length {len(data)}"
     # decoded = cv2.imdecode(np.frombuffer(data, np.uint8), -1)
     # if decoded is not None:
     #     print(f"Received image of resolution {decoded.shape}")
@@ -47,4 +48,7 @@ if __name__ == "__main__":
 
     server = simple_server.Server(HOST, PORT, BUFFER_SIZE, process_data)
 
+    while True:
+        user_input = input()
+        server.send_data(user_input)
     # cv2.namedWindow("Webcam", cv2.WINDOW_NORMAL)

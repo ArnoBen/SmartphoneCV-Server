@@ -26,11 +26,9 @@ class Server:
             try:
                 print(f"Connection address: {addr}")
                 data = conn.recv(self.buffer_size)
-                data_processor(data)
-                answer = f"Answer from server {i}"
-                i += 1
-                print("Sending: " + answer)
-                conn.sendall(answer.encode("utf8"))
+                processing_result = data_processor(data)
+                print("Sending: " + processing_result)
+                conn.sendall(processing_result.encode("utf8"))
             except ConnectionError as error:
                 print(f"CONNECTION ERROR : {error}")
                 conn.close()
