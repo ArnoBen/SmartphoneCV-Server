@@ -22,13 +22,14 @@ class Server:
         print("Waiting for connection...")
         conn, addr = s.accept()
         i = 0
+        print(f"Connection address: {addr}")
         while True:
             try:
-                print(f"Connection address: {addr}")
                 data = conn.recv(self.buffer_size)
                 processing_result = data_processor(data)
-                print("Sending: " + processing_result)
-                conn.sendall(processing_result.encode("utf8"))
+                if processing_result is not None:
+                    print("Sending: " + processing_result)
+                    conn.sendall(processing_result.encode("utf8"))
             except ConnectionError as error:
                 print(f"CONNECTION ERROR : {error}")
                 conn.close()
@@ -45,6 +46,7 @@ class Server:
 
     def send_data(self, data):
         try:
-            self.conn.sendall(data)
+            if data is not None:
+                self.conn.sendall(data)
         except ConnectionError as error:
             print(f"CONNECTION ERROR : {error}")
