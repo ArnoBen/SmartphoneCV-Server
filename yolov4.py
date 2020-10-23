@@ -9,7 +9,7 @@ class Info:
         self.class_name = class_name
         self.score = score
         self.center = center
-        self.width = width
+        self.width = widtha
         self.height = height
 
     def as_dict(self):
