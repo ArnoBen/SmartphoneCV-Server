@@ -57,7 +57,7 @@ class YoloDNN:
         cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
         cv2.imshow("detections", frame)
         cv2.waitKey(1)
-        return json.dump(self.get_info(classes, boxes, scores, frame))
+        return json.dumps(self.get_info(classes, boxes, scores, frame))
 
     def get_info(self, classes, boxes, scores, frame):
         infos = []
@@ -73,3 +73,4 @@ class YoloDNN:
             infos.append(info)
         return infos
 
+YoloDNN().get_detections(cv2.imread("picture.jpg"))
