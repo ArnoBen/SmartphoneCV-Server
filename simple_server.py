@@ -26,7 +26,7 @@ class Server:
         while True:
             try:
                 data = conn.recv(self.buffer_size)
-                processing_result = data_processor(data)
+                processing_result = data_processor.process_data(data)
                 if processing_result is not None:
                     print("Sending: " + processing_result)
                     conn.sendall(processing_result.encode("utf8"))
