@@ -71,6 +71,7 @@ class YoloDNN:
             center = (center_x, center_y)
             info = Info(class_name, scores[i][0], width, height, center)
             infos.append(info)
+        json.dumps([i.to_json() for i in infos])
         return infos
 
 YoloDNN().get_detections(cv2.imread("picture.jpg"))
