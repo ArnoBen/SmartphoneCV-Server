@@ -5,14 +5,13 @@ import json
 
 
 class Info:
-    def __init__(self, class_name, score, width, height, center):
+    def __init__(self, class_name, score, width, height, center, color):
         self.class_name = class_name
         self.score = score
         self.center = center
         self.width = width
         self.height = height
-
-
+        self.color = color
 
     def to_json(self):
         return json.dumps(self.as_dict())
@@ -22,7 +21,7 @@ class YoloDNN:
     def __init__(self):
         self.CONFIDENCE_THRESHOLD = 0.2
         self.NMS_THRESHOLD = 0.4
-        self.COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
+        self.COLORS = [(0, 255, 255), (255, 0, 255), (255, 255, 0), (0, 0, 255), (0, 255, 0), (255, 0, 0)]
         self.class_names = []
         with open("yolo_config/coco.names", "r") as f:
             self.class_names = [cname.strip() for cname in f.readlines()]
@@ -38,7 +37,6 @@ class YoloDNN:
         start = time.time()
         classes, scores, boxes = model.detect(frame, self.CONFIDENCE_THRESHOLD, self.NMS_THRESHOLD)
         end = time.time()
-
         start_drawing = time.time()
         for (classid, score, box) in zip(classes, scores, boxes):
             color = self.COLORS[int(classid) % len(self.COLORS)]
@@ -58,16 +56,25 @@ class YoloDNN:
         infos = []
         for i, class_id in enumerate(classes):
             class_name = self.class_names[class_id[0]]
-            center_x, center_y, width, height = boxes[i]
-            height = float(height / frame.shape[0]).__round__(3)
+            x1, y1, width, height = boxes[i]  # oui ces fous l'ont formatté comme ça
+            print(width)
+            print(height)
+            center_x = float((x1 + width/2) / frame.shape[1]).__round__(3)
+            center_y = float((y1 + height/2) / frame.shape[0]).__round__(3)
             width = float(width / frame.shape[1]).__round__(3)
-            center_x = float(center_x / frame.shape[1]).__round__(3)
-            center_y = float(center_y / frame.shape[0]).__round__(3)
+            height = float(height / frame.shape[0]).__round__(3)
+            print(frame.shape)
+            print(width)
+            print(height)
             center = (center_x, center_y)
             score = float(scores[i][0]).__round__(3)
-            info = Info(class_name, score, width, height, center)
+            color = self.COLORS[int(class_id) % len(self.COLORS)]
+
+            info = Info(class_name, score, width, height, center, color)
             infos.append(info)
         infos_json = json.dumps([info.__dict__ for info in infos])
         return infos_json
-
-# YoloDNN().get_detections(cv2.imread("picture.jpg"))
+#
+# YoloDNN().get_detections(cv2.flip(cv2.imread("car.jpg"),1))
+# while 1:
+#     cv2.waitKey(1)

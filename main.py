@@ -62,7 +62,7 @@ class DataProcessor:
 
 
 if __name__ == "__main__":
-    HOST, PORT = '', 9999
+    HOST, PORT = '', 10102
     BUFFER_SIZE = 2 ** 16
 
     print(f"Creating TCP server at {HOST}:{PORT}")
