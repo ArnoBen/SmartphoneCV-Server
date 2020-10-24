@@ -51,8 +51,8 @@ class DataProcessor:
             decoded = cv2.imdecode(np.frombuffer(self.buffer, np.uint8), -1)
             self.buffer.clear()
             #decoded = cv2.rotate(decoded, cv2.ROTATE_90_CLOCKWISE)
-            self.yolo_model.get_detections(decoded)
-            return f"Received image of resolution {decoded.shape}"
+            info_json = self.yolo_model.get_detections(decoded)
+            return info_json  # f"Received image of resolution {decoded.shape}"
         except TypeError:
             error_feedback = "The data received is not an image"
             return error_feedback

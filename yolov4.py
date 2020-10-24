@@ -9,18 +9,13 @@ class Info:
         self.class_name = class_name
         self.score = score
         self.center = center
-        self.width = widtha
+        self.width = width
         self.height = height
 
-    def as_dict(self):
-        return {'Class': self.class_name,
-                'Score': self.score,
-                'Center': self.center,
-                'Width': self.width,
-                'Height': self.height}
+
 
     def to_json(self):
-        return json.dumps(self.as_dict(), default=lambda o: str(o), sort_keys=True, indent=4)
+        return json.dumps(self.as_dict())
 
 
 class YoloDNN:
@@ -33,7 +28,7 @@ class YoloDNN:
             self.class_names = [cname.strip() for cname in f.readlines()]
 
     def get_detections(self, frame):
-        net = cv2.dnn.readNetFromDarknet("yolo_config/yolov4-tiny.cfg", "yolo_config/yolov4-tiny.weights")
+        net = cv2.dnn.readNetFromDarknet("yolo_config/yolov4.cfg", "yolo_config/yolov4.weights")
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
@@ -57,21 +52,22 @@ class YoloDNN:
         cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
         cv2.imshow("detections", frame)
         cv2.waitKey(1)
-        return json.dumps(self.get_info(classes, boxes, scores, frame))
+        return self.get_infos_json(classes, boxes, scores, frame)
 
-    def get_info(self, classes, boxes, scores, frame):
+    def get_infos_json(self, classes, boxes, scores, frame):
         infos = []
         for i, class_id in enumerate(classes):
             class_name = self.class_names[class_id[0]]
             center_x, center_y, width, height = boxes[i]
-            height /= frame.shape[0]
-            width /= frame.shape[1]
-            center_x /= frame.shape[0]
-            center_y /= frame.shape[1]
+            height = float(height / frame.shape[0]).__round__(3)
+            width = float(width / frame.shape[1]).__round__(3)
+            center_x = float(center_x / frame.shape[1]).__round__(3)
+            center_y = float(center_y / frame.shape[0]).__round__(3)
             center = (center_x, center_y)
-            info = Info(class_name, scores[i][0], width, height, center)
+            score = float(scores[i][0]).__round__(3)
+            info = Info(class_name, score, width, height, center)
             infos.append(info)
-        json.dumps([i.to_json() for i in infos])
-        return infos
+        infos_json = json.dumps([info.__dict__ for info in infos])
+        return infos_json
 
-YoloDNN().get_detections(cv2.imread("picture.jpg"))
+# YoloDNN().get_detections(cv2.imread("picture.jpg"))
