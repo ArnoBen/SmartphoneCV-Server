@@ -27,7 +27,7 @@ class YoloDNN:
             self.class_names = [cname.strip() for cname in f.readlines()]
 
     def get_detections(self, frame):
-        net = cv2.dnn.readNetFromDarknet("yolo_config/yolov4.cfg", "yolo_config/yolov4.weights")
+        net = cv2.dnn.readNetFromDarknet("yolo_config/yolov4-tiny.cfg", "yolo_config/yolov4-tiny.weights")
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 

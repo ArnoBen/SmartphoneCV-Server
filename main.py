@@ -50,7 +50,7 @@ class DataProcessor:
         try:
             decoded = cv2.imdecode(np.frombuffer(self.buffer, np.uint8), -1)
             self.buffer.clear()
-            #decoded = cv2.rotate(decoded, cv2.ROTATE_90_CLOCKWISE)
+            decoded = cv2.rotate(decoded, cv2.ROTATE_90_CLOCKWISE)
             info_json = self.yolo_model.get_detections(decoded)
             return info_json  # f"Received image of resolution {decoded.shape}"
         except TypeError:
