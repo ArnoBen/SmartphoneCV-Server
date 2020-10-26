@@ -1,5 +1,6 @@
 import socket
 import socketserver
+import urllib.request
 import json
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,7 @@ class DataProcessor:
         self.expected_length = -1
         self.buffer = bytearray(b'')
         self.yolo_model = yolov4.YoloDNN()
+        self.from_smartphone = False
 
     def process_data(self, data):
         # print(f"Received data of length {len(data)}")
@@ -22,13 +24,14 @@ class DataProcessor:
             # If the expected length is 0, data should be the length of the frame
             if self.expected_length == -1:
                 try:
-                    if data[:10].decode() == "datalength":
-                        self.expected_length = int.from_bytes(data[10:14], byteorder='little')
+                    if data[:11].decode() == "information":
+                        self.from_smartphone = True if data[11] == 1 else False
+                        self.expected_length = int.from_bytes(data[12:16], byteorder='little')
                         # print(f"total length expected to be {self.expected_length}")
                         self.buffer.clear()
                     return None
                 except UnicodeDecodeError:
-                    print("data received does not follow the form 'datalengthXXXX'.")
+                    print("data received does not follow the form 'informationXXXX'.")
                     return None
             # If it's not 0, we simply fill the buffer with the data being received
             else:
@@ -47,12 +50,17 @@ class DataProcessor:
                     return None
 
     def process_full_buffer(self):
+        frame = self.decode_image()
+        info_json = self.yolo_model.get_detections(frame)
+        return info_json  # f"Received image of resolution {decoded.shape}"
+
+    def decode_image(self):
         try:
             decoded = cv2.imdecode(np.frombuffer(self.buffer, np.uint8), -1)
             self.buffer.clear()
-            decoded = cv2.rotate(decoded, cv2.ROTATE_90_CLOCKWISE)
-            info_json = self.yolo_model.get_detections(decoded)
-            return info_json  # f"Received image of resolution {decoded.shape}"
+            if self.from_smartphone:
+                decoded = cv2.rotate(decoded, cv2.ROTATE_90_CLOCKWISE)
+            return decoded
         except TypeError:
             error_feedback = "The data received is not an image"
             return error_feedback
@@ -63,9 +71,11 @@ class DataProcessor:
 
 if __name__ == "__main__":
     HOST, PORT = '', 10102
-    BUFFER_SIZE = 2 ** 16
+    BUFFER_SIZE = 2 ** 15
 
-    print(f"Creating TCP server at {HOST}:{PORT}")
+    print(f"Creating TCP server at {HOST}:{PORT}\n"
+          f"Local IP : {socket.gethostbyname(socket.gethostname())}\n"
+          f"Global IP : {urllib.request.urlopen('https://ident.me').read().decode('utf8')}")
 
     data_processor = DataProcessor()
     server = simple_server.Server(HOST, PORT, BUFFER_SIZE, data_processor)
