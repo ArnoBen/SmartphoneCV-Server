@@ -22,7 +22,7 @@ class DataProcessor:
                         self.from_smartphone = True if data[11] == 1 else False
                         self.expected_length = int.from_bytes(data[12:16], byteorder='little')
                         print(f"total length expected to be {self.expected_length}")
-                        self.buffer.clear()
+                        self.clear_buffer()
                     return None
                 except UnicodeDecodeError:
                     print("data received does not follow the form 'informationXXXX'.")
@@ -38,7 +38,7 @@ class DataProcessor:
                     # clear everything and wait for next frame
                     print("buffer length over expected length")
                     self.expected_length = -1
-                    self.buffer.clear()
+                    self.clear_buffer()
                     return None
                 else:  # Waiting for more data
                     return None
@@ -47,6 +47,9 @@ class DataProcessor:
         frame = self.decode_image()
         info_json = self.yolo_model.get_detections(frame)
         return info_json  # f"Received image of resolution {decoded.shape}"
+
+    def clear_buffer(self):
+        self.buffer.clear()
 
     def decode_image(self):
         try:

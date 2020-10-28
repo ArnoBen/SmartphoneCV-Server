@@ -26,16 +26,15 @@ class YoloDNN:
         with open("yolo_config/coco.names", "r") as f:
             self.class_names = [cname.strip() for cname in f.readlines()]
 
-    def get_detections(self, frame):
         net = cv2.dnn.readNetFromDarknet("yolo_config/yolov4.cfg", "yolo_config/yolov4.weights")
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
+        self.model = cv2.dnn_DetectionModel(net)
+        self.model.setInputParams(size=(416, 416), scale=1 / 255)
 
-        model = cv2.dnn_DetectionModel(net)
-        model.setInputParams(size=(416, 416), scale=1 / 255)
-
+    def get_detections(self, frame):
         start = time.time()
-        classes, scores, boxes = model.detect(frame, self.CONFIDENCE_THRESHOLD, self.NMS_THRESHOLD)
+        classes, scores, boxes = self.model.detect(frame, self.CONFIDENCE_THRESHOLD, self.NMS_THRESHOLD)
         end = time.time()
         start_drawing = time.time()
         for (classid, score, box) in zip(classes, scores, boxes):

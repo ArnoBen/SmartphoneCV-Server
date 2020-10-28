@@ -21,11 +21,19 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         # self.request is the TCP socket connected to the client
-        self.data = self.request.recv(2 ** 15).strip()
-        result = dataprocessing.data_processor.process_data(self.data)
-        if result is not None:
-            print("result : " + result)
-            self.request.sendall(result)
+        print("Client connected : " + str(self.client_address))
+        while True:
+            self.data = self.request.recv(2 ** 11).strip()
+            if len(self.data) == 0:
+                print("No data received, closing socket")
+                dataprocessing.data_processor.clear_buffer()
+                break
+            else:
+                print(f"Received data : {len(self.data)}")
+                result = dataprocessing.data_processor.process_data(self.data)
+                if result is not None:
+                    print("Sending : " + result)
+                    self.request.sendall(result.encode("utf8"))
 
 
 if __name__ == "__main__":
@@ -34,7 +42,8 @@ if __name__ == "__main__":
 
     print(f"Creating TCP server at {HOST}:{PORT}\n"
           f"Local IP : {socket.gethostbyname(socket.gethostname())}\n"
-          f"Global IP : {urllib.request.urlopen('https://ident.me').read().decode('utf8')}")
+          # f"Global IP : {urllib.request.urlopen('https://ident.me').read().decode('utf8')}"
+            )
 
     with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # Activate the server; this will keep running until you
