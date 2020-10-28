@@ -22,15 +22,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         # self.request is the TCP socket connected to the client
         print("Client connected : " + str(self.client_address))
+        self.data_processor = dataprocessing.DataProcessor()
         while True:
-            self.data = self.request.recv(2 ** 11).strip()
+            if self.data_processor.expected_length == -1:   # If we are waiting for the information data
+                self.data = self.request.recv(16)
+            else:                                           # If we are waiting for the frame data
+                self.data = self.request.recv(2 ** 11)
+
             if len(self.data) == 0:
                 print("No data received, closing socket")
-                dataprocessing.data_processor.clear_buffer()
+                self.data_processor.clear_buffer()
                 break
             else:
                 print(f"Received data : {len(self.data)}")
-                result = dataprocessing.data_processor.process_data(self.data)
+                result = self.data_processor.process_data(self.data)
                 if result is not None:
                     print("Sending : " + result)
                     self.request.sendall(result.encode("utf8"))

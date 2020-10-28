@@ -11,7 +11,6 @@ class DataProcessor:
         self.from_smartphone = False
 
     def process_data(self, data):
-        print(f"Received data of length {len(data)}")
         if data is None:  # return if no data
             return None
         else:
@@ -39,7 +38,7 @@ class DataProcessor:
                     print("buffer length over expected length")
                     self.expected_length = -1
                     self.clear_buffer()
-                    return None
+                    return "error~buffer overflow"
                 else:  # Waiting for more data
                     return None
 
